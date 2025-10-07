@@ -1,1 +1,55 @@
+# Get title and link content, image
+for a in all_title_news[:3]:
+    title = a.get_text(strip=True)
+    href  = a.get('href')
+    # 內文的爬蟲
+    news_res = requests.get(href, headers=headers, timeout=5)
+    news_soup = BeautifulSoup(news_res.text, "html.parser")
+    paragraph = news_soup.find_all(
+        'p',
+        attrs={'class':'mb-module-gap break-words leading-[1.4] text-px20 lg:text-px18 lg:leading-[1.8] text-batcave'},
+        limit=5
+    )
+    # 讀取圖片縮圖, 這裡使用 find 是因為 find 每次僅會讀取一個(所以在 for 迴圈裡每次都會得到每篇新聞的第一個圖片)
+    photo_image = news_soup.find('img', attrs={'class':"rounded-lg"})
+    image_url = photo_image['src'] if photo_image else image_url_init
+    # 摘要初始化
+    summary = "（無法擷取摘要）"    
+    # 讀取摘要
+    for p in paragraph:
+        # 將空格移除
+        text = p.get_text(strip=True)
+        # 有時 HTML 新聞稿會先寫入無關字眼(如 XXX記者報導)，這裡碰到"無用字眼"會跳過繼續執行
+        if any(k in text for k in ["報導", "記者", "中心／", "新聞網", "FTNN"]):
+            continue
+        summary = text
+        # 這裡為甚麼可以每次都拿到對的文章摘要 >>> 因為 find 不會重複找
+        # 所以每次都是 n 開始(比如第二次搜尋他會從第二篇開始)，因為第一篇前一次以提取
+        # 必須使用 break 否則 for 迴圈無法停止
+        break
+    
+    # 這裡是為了避免摘要過長造成混亂，可依照使用者需求作調整
+    summary_25 = summary[:25] + '....'
+    # 建立 Carousel 卡片
+        columns.append(
+            CarouselColumn(
+                # 匯入固定參數
+                thumbnail_image_url=image_url,
+                # Line 可接受的標題 Max = 40，可依照使用情況調整
+                title=title[:39],
+                text=summary_25,
+                actions=[
+                    URIAction(label="閱讀原文", uri=href)
+                ]
+            )
+        )
+    # 以下皆為固定格式加上選擇參數，可以稍微想一下
+    carousel_template = CarouselTemplate(columns=columns)
 
+    template_message = TemplateMessage(
+        # 固定格式，alt_text = "我是訊息外的預覽"
+        alt_text="Yahoo 熱門新聞",
+        template=carousel_template
+    )
+
+    return template_message
