@@ -1,3 +1,4 @@
+# Part-google-爬蟲
 def get_stock_news(word):
     query = word.strip() or "財經快訊"
     url = f'https://www.google.com/search?q={query}&tbm=nws'
