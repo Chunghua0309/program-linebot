@@ -27,8 +27,8 @@ from linebot.v3.webhooks import (
 app = Flask(__name__)
 
 # 設定 LINE Bot Token & Secret
-configuration = Configuration(access_token='7frhXh1e19q+ndOKuOnq7M/BSfg9mVj5ggEFnwtk1dphEtI/4Ss/9y9ey/5ScXEj0SkKrG5MCmkAYBlXt54g7FPXTY7kenoAiWV5Xo1KbulsX+DOXVdEsjBUMx1NgbXy+yoqukqPkBAn9SUs+/n52wdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('6c769c95cda433561660af945462844b')
+configuration = Configuration(access_token='輸入Line developer 資料')
+handler = WebhookHandler('輸入Line developer 資料')
 
 
 @app.route("/callback", methods=['POST'])
@@ -220,3 +220,4 @@ def get_yahoo_news_hot():
 
 if __name__ == "__main__":
     app.run(port=5000)
+
