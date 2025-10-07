@@ -1,0 +1,61 @@
+def get_yahoo_news_hot():
+    url = "https://tw.news.yahoo.com/"
+    image_url_init = "https://photos.fife.usercontent.google.com/pw/AP1GczPqrR3bgE3Zo2-8osP1NWOhfy8X_VFWt79wK7bnboveg8J5sn6w5PLuLg=s237-no?authuser=0" # 預設圖片防呆
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    all_title_news = soup.find_all(
+        'a',
+        attrs={'class': "D(ib) Ov(h) Whs(nw) C($c-fuji-grey-l) C($c-fuji-blue-1-c):h Td(n) Fz(16px) Tov(e) Fw(700)"}
+    )
+
+    columns = []
+
+    for a in all_title_news[:3]:
+        title = a.get_text(strip=True)
+        href  = a.get('href')
+        # 內文的爬蟲
+        news_res = requests.get(href, headers=headers, timeout=5)
+        news_soup = BeautifulSoup(news_res.text, "html.parser")
+        paragraph = news_soup.find_all(
+            'p',
+            attrs={'class':'mb-module-gap break-words leading-[1.4] text-px20 lg:text-px18 lg:leading-[1.8] text-batcave'},
+            limit=5
+        )
+        # 讀取圖片縮圖
+        photo_image = news_soup.find('img', attrs={'class':"rounded-lg"})
+        image_url = photo_image['src'] if photo_image else image_url_init
+        # 讀取摘要
+        summary = "（無法擷取摘要）"
+        for p in paragraph:
+            text = p.get_text(strip=True)
+            if any(k in text for k in ["報導", "記者", "中心／", "新聞網", "FTNN"]):
+                continue
+            summary = text
+            break
+        summary_25 = summary[:25] + '....'
+
+        # 建立 Carousel 卡片
+        columns.append(
+            CarouselColumn(
+                thumbnail_image_url=image_url,
+                title=title[:10],
+                text=summary_25,
+                actions=[
+                    URIAction(label="閱讀原文", uri=href)
+                ]
+            )
+        )
+
+    carousel_template = CarouselTemplate(columns=columns)
+
+    template_message = TemplateMessage(
+        alt_text="Yahoo 熱門新聞",
+        template=carousel_template
+    )
+
+    return template_message
