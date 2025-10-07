@@ -1,3 +1,4 @@
+# Full-code
 from flask import Flask, request, abort
 import requests
 from bs4 import BeautifulSoup
@@ -220,4 +221,5 @@ def get_yahoo_news_hot():
 
 if __name__ == "__main__":
     app.run(port=5000)
+
 
