@@ -1,0 +1,39 @@
+def restaurant_menu(word):
+    query = word.strip() or '鼎泰豐' 
+    query_menu = query
+    search_url = f"https://www.google.com/search?q={query_menu}&udm=2"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
+    res = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(res.text, "html.parser")
+    all_title = soup.find_all('div', attrs={'class':"toI8Rb OSrXXb"})
+    all_href = soup.find_all('a', attrs={'class': "EZAeBe"})
+    # print(all_title)
+    columns = []
+
+    for title, src_href in zip(all_title[:3], all_href[:3]):
+        title_string = title.get_text(strip=True)
+        href_link = src_href['href']
+        
+        
+        # 建立 Carousel 卡片
+        columns.append(
+            CarouselColumn(
+                # thumbnail_image_url=image_url,
+                title=title_string[:20],
+                text=f"{query_menu}",
+                actions=[
+                    URIAction(label="點我看菜單", uri=href_link)
+                ]
+            )
+        )
+
+    carousel_template = CarouselTemplate(columns=columns)
+
+    template_message = TemplateMessage(
+        alt_text= "菜單",
+        template=carousel_template
+    )
+
+    return template_message   
