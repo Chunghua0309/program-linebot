@@ -28,8 +28,8 @@ from linebot.v3.webhooks import (
 app = Flask(__name__)
 
 # 設定 LINE Bot Token & Secret
-configuration = Configuration(access_token='輸入Line developer 資料')
-handler = WebhookHandler('輸入Line developer 資料')
+configuration = Configuration(access_token='你的_LINE_CHANNEL_ACCESS_TOKEN')
+handler = WebhookHandler('你的_LINE_CHANNEL_SECRET')
 
 
 @app.route("/callback", methods=['POST'])
@@ -221,5 +221,6 @@ def get_yahoo_news_hot():
 
 if __name__ == "__main__":
     app.run(port=5000)
+
 
 
