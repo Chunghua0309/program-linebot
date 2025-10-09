@@ -1,0 +1,66 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+# === 瀏覽器設定 ===
+options = Options()
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_argument("--window-size=1920,1080")
+# options.add_argument("--headless")
+
+service = Service("C:/Users/ben09/OneDrive/創業/桌面/Line new bot/chromedriver-win64/chromedriver.exe")
+driver = webdriver.Chrome(service=service, options=options)
+wait = WebDriverWait(driver, 10)
+
+keyword = "麥味登 菜單"
+
+# Step 1️⃣：Google 搜尋
+driver.get("https://www.google.com")
+search_box = wait.until(EC.presence_of_element_located((By.NAME, "q")))
+search_box.send_keys(keyword)
+search_box.send_keys(Keys.RETURN)
+
+# Step 2️⃣：等搜尋結果頁載入
+wait.until(EC.presence_of_element_located((By.ID, "search")))
+
+# Step 3️⃣：找出所有 a 標籤，找出「圖片」或「Images」分頁
+tabs = driver.find_elements(By.CSS_SELECTOR, "a")
+clicked = False
+
+for tab in tabs:
+    href = tab.get_attribute("href")
+    text = tab.text.strip()
+    # 確認是「圖片」分頁
+    if (text in ["圖片", "Images"]) or (href and "tbm=isch" in href):
+        print(f"🔗 找到圖片分頁連結: {href}")
+        driver.get(href)
+        clicked = True
+        print("✅ 成功切換到圖片分頁")
+        break
+
+if not clicked:
+    print("❌ 找不到圖片分頁，可能是 Google 版面有更新")
+
+# Step 4️⃣：等圖片出現
+
+wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "img")))
+time.sleep(2)
+imgs = driver.find_elements(By.CSS_SELECTOR, "img")
+img_urls = []
+for img in imgs:
+    src = img.get_attribute("src")
+    if src and src.startswith("http"):
+        img_urls.append(src)
+    if len(img_urls) >= 5:
+        break
+print(f"✅ 共抓到 {len(img_urls)} 張圖片：")
+for i, u in enumerate(img_urls, 1):
+    print(f"i:{i}. u:{u}")
+
+
+driver.quit()
