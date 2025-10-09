@@ -13,11 +13,11 @@ options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument("--window-size=1920,1080")
 # options.add_argument("--headless")
 
-service = Service("C:/Users/ben09/OneDrive/創業/桌面/Line new bot/chromedriver-win64/chromedriver.exe")
+service = Service("你的webdriver存放處")
 driver = webdriver.Chrome(service=service, options=options)
 wait = WebDriverWait(driver, 10)
 
-keyword = "麥味登 菜單"
+keyword = "某餐廳 菜單"
 
 # Step 1️⃣：Google 搜尋
 driver.get("https://www.google.com")
@@ -36,7 +36,7 @@ for tab in tabs:
     href = tab.get_attribute("href")
     text = tab.text.strip()
     # 確認是「圖片」分頁
-    if (text in ["圖片", "Images"]) or (href and "tbm=isch" in href):
+    if (text in ["圖片", "Images"]) :
         print(f"🔗 找到圖片分頁連結: {href}")
         driver.get(href)
         clicked = True
@@ -60,7 +60,7 @@ for img in imgs:
         break
 print(f"✅ 共抓到 {len(img_urls)} 張圖片：")
 for i, u in enumerate(img_urls, 1):
-    print(f"i:{i}. u:{u}")
+    print(f"{i}. {u}")
 
 
 driver.quit()
